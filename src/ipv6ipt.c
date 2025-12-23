@@ -33,19 +33,19 @@ static int ipt6_iface_setup(void)
     char iface_str[IFNAMSIZ];
     size_t i;
     int res;
-    char *ipt_alliface_src_cmd[] = {"ip6tables", "-w",        "-t",
+    char *ipt_alliface_src_cmd[] = {"ip6tables",             "-t",
                                     "mangle",    "-A",        "FAKESIP_S",
                                     "-j",        "FAKESIP_R", NULL};
 
-    char *ipt_alliface_dst_cmd[] = {"ip6tables", "-w",        "-t",
+    char *ipt_alliface_dst_cmd[] = {"ip6tables",             "-t",
                                     "mangle",    "-A",        "FAKESIP_D",
                                     "-j",        "FAKESIP_R", NULL};
 
-    char *ipt_iface_src_cmd[] = {"ip6tables", "-w",        "-t", "mangle",
+    char *ipt_iface_src_cmd[] = {"ip6tables",             "-t", "mangle",
                                  "-A",        "FAKESIP_S", "-i", iface_str,
                                  "-j",        "FAKESIP_R", NULL};
 
-    char *ipt_iface_dst_cmd[] = {"ip6tables", "-w",        "-t", "mangle",
+    char *ipt_iface_dst_cmd[] = {"ip6tables",             "-t", "mangle",
                                  "-A",        "FAKESIP_D", "-o", iface_str,
                                  "-j",        "FAKESIP_R", NULL};
 
@@ -92,47 +92,46 @@ int fs_ipt6_setup(void)
     size_t i, ipt_cmds_cnt;
     int res;
     char *ipt_cmds[][32] = {
-        {"ip6tables", "-w", "-t", "mangle", "-N", "FAKESIP_S", NULL},
+        {"ip6tables", "-t", "mangle", "-N", "FAKESIP_S", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-N", "FAKESIP_D", NULL},
+        {"ip6tables", "-t", "mangle", "-N", "FAKESIP_D", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-I", "PREROUTING", "-j",
+        {"ip6tables", "-t", "mangle", "-I", "PREROUTING", "-j",
          "FAKESIP_S", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-I", "POSTROUTING", "-j",
+        {"ip6tables", "-t", "mangle", "-I", "POSTROUTING", "-j",
          "FAKESIP_D", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-N", "FAKESIP_R", NULL},
+        {"ip6tables", "-t", "mangle", "-N", "FAKESIP_R", NULL},
 
         /*
             drop time-exceeded ICMP packets
         */
-        {"iptables", "-w", "-t", "mangle", "-A", "FAKESIP_S", "-p", "icmp",
+        {"iptables", "-t", "mangle", "-A", "FAKESIP_S", "-p", "icmp",
          "--icmp-type", "11", "-j", "DROP", NULL},
 
         /*
             exclude non-GUA IPv6 addresses (from source)
         */
-        {"ip6tables", "-w", "-t", "mangle", "-A", "FAKESIP_S", "!", "-s",
+        {"ip6tables", "-t", "mangle", "-A", "FAKESIP_S", "!", "-s",
          "2000::/3", "-j", "RETURN", NULL},
 
         /*
             exclude non-GUA IPv6 addresses (to destination)
         */
-        {"ip6tables", "-w", "-t", "mangle", "-A", "FAKESIP_D", "!", "-d",
+        {"ip6tables", "-t", "mangle", "-A", "FAKESIP_D", "!", "-d",
          "2000::/3", "-j", "RETURN", NULL},
 
         /*
             exclude marked packets
         */
-        {"ip6tables", "-w", "-t", "mangle", "-A", "FAKESIP_R", "-m", "mark",
+        {"ip6tables", "-t", "mangle", "-A", "FAKESIP_R", "-m", "mark",
          "--mark", xmark_str, "-j", "RETURN", NULL},
 
         /*
             send to nfqueue
         */
         {"ip6tables",
-         "-w",
          "-t",
          "mangle",
          "-A",
@@ -193,23 +192,23 @@ void fs_ipt6_cleanup(void)
 {
     size_t i, cnt;
     char *ipt_cmds[][32] = {
-        {"ip6tables", "-w", "-t", "mangle", "-F", "FAKESIP_R", NULL},
+        {"ip6tables", "-t", "mangle", "-F", "FAKESIP_R", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-F", "FAKESIP_S", NULL},
+        {"ip6tables", "-t", "mangle", "-F", "FAKESIP_S", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-F", "FAKESIP_D", NULL},
+        {"ip6tables", "-t", "mangle", "-F", "FAKESIP_D", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-D", "PREROUTING", "-j",
+        {"ip6tables", "-t", "mangle", "-D", "PREROUTING", "-j",
          "FAKESIP_S", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-D", "POSTROUTING", "-j",
+        {"ip6tables", "-t", "mangle", "-D", "POSTROUTING", "-j",
          "FAKESIP_D", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-X", "FAKESIP_R", NULL},
+        {"ip6tables", "-t", "mangle", "-X", "FAKESIP_R", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-X", "FAKESIP_S", NULL},
+        {"ip6tables", "-t", "mangle", "-X", "FAKESIP_S", NULL},
 
-        {"ip6tables", "-w", "-t", "mangle", "-X", "FAKESIP_D", NULL}};
+        {"ip6tables", "-t", "mangle", "-X", "FAKESIP_D", NULL}};
 
     cnt = sizeof(ipt_cmds) / sizeof(*ipt_cmds);
     for (i = 0; i < cnt; i++) {
