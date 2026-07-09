@@ -12,7 +12,6 @@ OBJS := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(SRCS))
 
 override CFLAGS+=-std=c99 -I$(INCLUDEDIR) -frandom-seed=fakesip \
 	-pedantic -Wall -Wextra -Wdate-time
-override LDFLAGS+=-lnetfilter_queue -lnfnetlink -lmnl
 
 ifdef VERSION
 	override CFLAGS += -DVERSION=\"$(VERSION)\"
@@ -22,6 +21,16 @@ FAKESIP=$(BUILDDIR)/fakesip
 
 ifeq ($(STATIC), 1)
 	override LDFLAGS += -static
+endif
+
+# STATIC_LIBNFQ=1: statically link libnetfilter_queue/libnfnetlink/libmnl
+# only, while still dynamically linking libc and other system libraries.
+# This keeps the binary free of runtime dependencies on those three
+# libraries without bloating it with a fully static libc.
+ifeq ($(STATIC_LIBNFQ), 1)
+	override LDFLAGS += -Wl,-Bstatic -lnetfilter_queue -lnfnetlink -lmnl -Wl,-Bdynamic
+else
+	override LDFLAGS += -lnetfilter_queue -lnfnetlink -lmnl
 endif
 
 ifeq ($(DEBUG), 1)
