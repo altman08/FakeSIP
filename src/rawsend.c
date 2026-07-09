@@ -40,6 +40,18 @@
 #include "payload.h"
 #include "srcinfo.h"
 
+/*
+ * SO_BINDTOIFINDEX was added in Linux 5.7. Toolchains shipping older
+ * kernel headers (e.g. some cross toolchains bundling 4.19 headers)
+ * don't define it, which breaks the build even though the code already
+ * falls back to SO_BINDTODEVICE at runtime (via ENOPROTOOPT) when the
+ * running kernel doesn't support it. Define it here with its stable
+ * upstream value so the code still compiles with such toolchains.
+ */
+#ifndef SO_BINDTOIFINDEX
+#define SO_BINDTOIFINDEX 62
+#endif /* SO_BINDTOIFINDEX */
+
 #define NO_SNAT   0
 #define NEED_SNAT 1
 
